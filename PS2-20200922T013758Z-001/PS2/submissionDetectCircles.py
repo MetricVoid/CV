@@ -66,6 +66,13 @@ def detect_circles(img, radius, use_Grad=False, sigma=1.0, threshold=0.8, epsilo
         if not hough:
             return centroid
         return centroid, votes
+    circled_img = img.copy()
+    for center in centers:
+        circle = circle_perimeter(center[0], center[1], radius=radius, shape=img.shape)
+        circled_img[circle] = draw_color
+    imsave('reduced_' + save_name_circled, circled_img)
+
+    print('Circle Count:', count)
 
 def extraCredit():
     egg_img = np.array(imread('./egg.jpg'))
@@ -135,11 +142,14 @@ if __name__ == '__main__':
     centers, votes = detect_circles(img, radius, use_Grad=use_Grad, threshold=threshold, sigma=sigma, bin_scale=bin_scale, epsilon=epsilon, hough=True)
     scale_factor = 255 / votes.max()
     hough_img = (scale_factor * votes).astype(np.uint8)
+    labels = measure.label(hough_img_threshold, background=0)
+    count = labels.max()
     for center in centers:
         circle = circle_perimeter(center[0], center[1], radius=radius, shape=img.shape)
         circled_img[circle] = draw_color
     plt.rcParams['figure.figsize'] = [16, 10]
     fig, axs = plt.subplots(1, 2)
+    print(count)
     axs[0].imshow(circled_img)
     axs[1].imshow(hough_img, cmap='gray')
     axs[0].title.set_text('Circles Marked')
